@@ -4,7 +4,7 @@
   "description": "Ghuiom",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -15,5 +15,8 @@
   "devDependencies": {
     "aws-sdk-mock": "^5.9.0",
     "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
