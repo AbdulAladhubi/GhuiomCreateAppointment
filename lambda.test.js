@@ -1,16 +1,21 @@
-// lambda.test.js
 const AWSMock = require('aws-sdk-mock');
 const AWS = require('aws-sdk');
-const { handler } = require('./index');
+AWS.config.update({ region: 'eu-west-1' }); // Set the region for your tests
+const { handler } = require('./index'); // Adjust the path as necessary
 
-// Mock DynamoDB DocumentClient
-AWSMock.setSDKInstance(AWS);
-AWSMock.mock('DynamoDB.DocumentClient', 'put', (params, callback) => {
-    callback(null, { statusCode: 200 }); // Simulating successful insertion
-});
+describe('Post Request Test', () => {
+  beforeAll(() => {
+    AWSMock.setSDKInstance(AWS);
+    AWSMock.mock('DynamoDB.DocumentClient', 'put', (params, callback) => {
+      callback(null, { statusCode: 200 });
+    });
+  });
 
-describe('Lambda Function Test', () => {
-  it('should create an appointment successfully', async () => {
+  afterAll(() => {
+    AWSMock.restore('DynamoDB.DocumentClient');
+  });
+
+  it('should display a success message upon creating an appointment', async () => {
     const event = {
       body: JSON.stringify({
         UserID: "user000",
@@ -28,15 +33,15 @@ describe('Lambda Function Test', () => {
       })
     };
 
+    const expectedResponse = {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "Appointment created successfully",
+        AppointmentID: expect.any(String)
+      })
+    };
+
     const result = await handler(event);
-    const body = JSON.parse(result.body);
-
-    expect(result.statusCode).toBe(200);
-    expect(body.message).toBe("Appointment created successfully");
-    expect(typeof body.AppointmentID).toBe('string'); // Checking if AppointmentID is a string
-  });
-
-  afterAll(() => {
-    AWSMock.restore('DynamoDB.DocumentClient');
+    expect(result).toEqual(expectedResponse);
   });
 });
